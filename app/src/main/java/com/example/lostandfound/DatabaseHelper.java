@@ -45,40 +45,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return row;
     }
 
-    public boolean fetchItem(String username, String password) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query("USERS", new String[]{"USERID"}, "USERNAME=? AND PASSWORD=?", new String[]{username, password}, null, null, null);
-        int num_rows = cursor.getCount();
-        db.close();
-        if (num_rows > 0) {
-            return true;
-        } else {
-            return false;
-        }
+    public void deleteItem(Item item) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete("ITEMS", "ITEMID" + "=?", new String[] { Integer.toString(item.getItemId()) });
     }
 
-    public List<User> fetchAllUser() {
+    public List<Item> fetchAllItem() {
         SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "SELECT * FROM USERS";
+        String sql = "SELECT * FROM ITEMS";
         Cursor cursor = db.rawQuery(sql, null);
 
-        List<User> userList = new ArrayList<>();
+        List<Item> itemList = new ArrayList<>();
 
         if (cursor.moveToFirst()) {
             do {
-                User user = new User(cursor.getString(1), cursor.getString(2));
-                userList.add(user);
+                Item user = new Item(cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5));
+                user.setItemId(cursor.getInt(0));
+                itemList.add(user);
                 cursor.moveToNext();
             } while(!cursor.isAfterLast());
         }
-        return userList;
-    }
-
-    public int updatePassword(User user) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("PASSWORD", user.getPassword());
-
-        return db.update("USERS", contentValues, "USERNAME=?", new String[]{user.getUsername()});
+        return itemList;
     }
 }
